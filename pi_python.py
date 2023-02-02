@@ -18,6 +18,7 @@ class PiNetwork:
     network = ""
     server = ""
     keypair = ""
+    fee = ""
 
     def initialize(self, api_key, wallet_private_key, network):
         if not self.validate_private_seed_format(wallet_private_key):
@@ -27,6 +28,7 @@ class PiNetwork:
         self.base_url = "https://api.minepi.com"
         self.open_payments = {}        
         self.network = network
+        self.fee = self.server.fetch_base_fee()
 
     def get_payment(self, payment_id):
         url = self.base_url + "/v2/payments/" + payment_id
@@ -42,6 +44,18 @@ class PiNetwork:
             obj = {
               'payment': payment_data,
             }
+
+            balances = self.server.accounts().account_id(self.keypair.public_key).call()["balances"]
+            balance_found = False
+            for i in balances:
+                if i["asset_type"] == "native":
+                    balance_found = True
+                    if (float(payment_data["amount"]) + (float(self.fee)/10000000)) > float(i["balance"]):
+                        return ""
+                    break
+
+            if balance_found == False:
+                return ""
             
             obj = json.dumps(obj)            
             url = self.base_url + "/v2/payments"
@@ -60,6 +74,19 @@ class PiNetwork:
             payment = self.open_payments[payment_id]
         else:
             payment = pending_payment
+
+        balances = self.server.accounts().account_id(self.keypair.public_key).call()["balances"]
+        balance_found = False
+
+        for i in balances:
+            if i["asset_type"] == "native":
+                balance_found = True
+                if (float(payment["amount"]) + (float(self.fee)/10000000)) > float(i["balance"]):
+                    return ""
+                break
+                
+        if balance_found == False:
+            return ""
         
         if __debug__:
             print("Debug_Data: Payment information\n" + str(payment))
@@ -138,13 +165,13 @@ class PiNetwork:
 
 
     def build_a2u_transaction(self, transaction_data):
-        if not self.validate_payment_data(transaction_data):
-            print("No valid transaction!")
+        #if not self.validate_payment_data(transaction_data):
+        #    print("No valid transaction!")
             
         amount = str(transaction_data["amount"])
         
         # TODO: get this from horizon
-        fee = 100000 # 0.01π
+        fee = self.fee #100000 # 0.01π
         to_address = transaction_data["to_address"]
         memo = transaction_data["identifier"]
         
@@ -181,10 +208,10 @@ class PiNetwork:
             return False
         elif "uid" not in data:
             return False
-        elif "identifier" not in data:
-            return False
-        elif "recipient" not in data:
-            return False
+        #elif "identifier" not in data:
+        #    return False
+        #elif "recipient" not in data:
+        #    return False
         return True
 
     def validate_private_seed_format(self, seed):
@@ -247,7 +274,9 @@ payment_id = pi.create_payment(payment_data)
     
     Store the txid on your side!
 """
-txid = pi.submit_payment(payment_id, False)
+if payment_id and len(payment_id) > 0:
+    txid = pi.submit_payment(payment_id, False)
 
-""" Complete the Payment """
-payment = pi.complete_payment(payment_id, txid)
+    """ Complete the Payment """
+    if txid and len(txid) > 0:
+        payment = pi.complete_payment(payment_id, txid)
