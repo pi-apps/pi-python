@@ -9,7 +9,7 @@ This is a user generated Python-based solution for Pi Network you can use to int
 ```python
 """ Secret Data """
 api_key = "Enter Here Your API Key" 
-wallet_private_seed = "SecretWalletPassphrase" 
+wallet_private_seed = "SecretWalletSeed" 
 
 """ Initialization """
 pi = PiNetwork()
