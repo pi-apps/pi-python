@@ -2,6 +2,8 @@
 
 This is a user generated Python-based solution for Pi Network you can use to integrate the Pi Network apps platform with a Python backend application.
 
+pi_python.py is the Library and pi_python_test.py is to test the Library.
+
 
 ## Example
 
