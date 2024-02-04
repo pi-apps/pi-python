@@ -17,4 +17,4 @@ Create an Issue in this repository. Describe which version of Python and pip are
 
 If you have any question you could write an email at latinchain.info@gmail.com.
 
-If your vurnebility is accepted, you will be asked to do a pull request or we could make the changes directly.
+If your vurnebility is accepted, you will be asked to do a pull request or we could make the changes directly. We could make some changes to your pull request to adapt to the Project.
